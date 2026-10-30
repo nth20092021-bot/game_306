@@ -44,15 +44,10 @@ const royalDialFragmentShader = `
     float ring3 = smoothstep(0.010, 0.002, abs(r - 0.56));
     float ring4 = smoothstep(0.010, 0.002, abs(r - 0.34));
 
-    // 3. Họa tiết chạm khắc Đông Sơn mượt mà (Dùng hàm cosine liên tục, TUYỆT ĐỐI KHÔNG dùng step thô gây chớp đen)
-    float motifOuter = (cos(angle * 28.0) * 0.5 + 0.5) * smoothstep(0.035, 0.005, abs(r - 0.85));
-    float motifMid   = (sin(angle * 20.0) * 0.5 + 0.5) * smoothstep(0.030, 0.005, abs(r - 0.67));
-    float motifInner = (cos(angle * 14.0) * 0.5 + 0.5) * smoothstep(0.025, 0.005, abs(r - 0.45));
+    // 3. Tổng hợp các tầng hoa văn vàng đồng ổn định (loại bỏ hoàn toàn các khối sọc gây chớp chữ)
+    float combined = (ring1 * 1.2 + ring2 * 0.9 + ring3 * 0.8 + ring4 * 0.9 + starCore * 1.2);
 
-    // 4. Tổng hợp các tầng hoa văn vàng đồng
-    float combined = (ring1 * 1.2 + ring2 * 0.9 + ring3 * 0.8 + ring4 * 0.9 + motifOuter * 0.65 + motifMid * 0.6 + motifInner * 0.55 + starCore * 1.2);
-
-    // 5. Luồng sáng tâm tỏa nhiệt ấm áp & hiệu ứng bừng sáng khi bấm BẮT ĐẦU (uIgnition)
+    // 4. Luồng sáng tâm tỏa nhiệt ấm áp & hiệu ứng bừng sáng khi bấm BẮT ĐẦU (uIgnition)
     float centerGlow = exp(-r * (3.2 - uIgnition * 1.4)) * (0.35 + uIgnition * 1.6);
     float pulse = sin(uTime * 1.5) * 0.04; // Dao động thở nhẹ nhàng thanh lịch (không chớp)
 
@@ -335,9 +330,18 @@ export const TimeRewindClockModel: React.FC<TimeRewindClockProps> = ({
       ctx.stroke();
     }
 
-    // 12 chữ số La Mã mạ vàng đồng cổ điển (Cinzel / Playfair Display)
+    // Chapter Ring: Vành hổ phách sẫm bán trong suốt tạo độ tương phản cao, triệt tiêu hoàn toàn hiện tượng chớp chữ
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, 876, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 720, 0, Math.PI * 2, true);
+    ctx.fillStyle = 'rgba(10, 8, 6, 0.52)';
+    ctx.fill();
+    ctx.restore();
+
+    // 12 chữ số La Mã mạ vàng đồng cổ điển sắc nét (không dùng shadowBlur gây chớp nháy)
     const numerals = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
-    ctx.font = '700 94px "Cinzel", "Playfair Display", Georgia, serif';
+    ctx.font = '700 92px "Cinzel", "Playfair Display", Georgia, serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
@@ -351,14 +355,14 @@ export const TimeRewindClockModel: React.FC<TimeRewindClockProps> = ({
       ctx.translate(x, y);
       ctx.rotate(angle + Math.PI / 2);
 
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-      ctx.shadowBlur = 10;
-      ctx.fillStyle = '#F3C65F';
-      ctx.fillText(roman, 0, 0);
-
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#FFF0B8';
+      // Viền tương phản sắc nét
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#221406';
       ctx.strokeText(roman, 0, 0);
+
+      // Thân chữ vàng kim hoàng gia
+      ctx.fillStyle = '#F5C75A';
+      ctx.fillText(roman, 0, 0);
       ctx.restore();
     });
 
@@ -394,7 +398,7 @@ export const TimeRewindClockModel: React.FC<TimeRewindClockProps> = ({
     materials.warmAmberGold.emissiveIntensity = 0.45 + ign * 1.1;
 
     if (coreLightRef.current) {
-      coreLightRef.current.intensity = 2.0 + ign * 6.5 + Math.sin(t * 5) * 0.3;
+      coreLightRef.current.intensity = 2.0 + ign * 6.5;
     }
     if (rimLightRef.current) {
       rimLightRef.current.intensity = 1.6 + ign * 3.8;
@@ -681,21 +685,18 @@ export const TimeRewindClockModel: React.FC<TimeRewindClockProps> = ({
 
       {/* LỚP PHỦ VÒNG SỐ LA MÃ (I - XII) & VẠCH ĐỨT ĐỒNG TÂM TRONG SUỐT */}
       {romanOverlayTexture && (
-        <mesh position={[0, 0, 0.082]}>
+        <mesh position={[0, 0, 0.092]}>
           <planeGeometry args={[5.25, 5.25]} />
           <meshBasicMaterial
             map={romanOverlayTexture}
             transparent
             depthWrite={false}
-            polygonOffset
-            polygonOffsetFactor={-1}
-            polygonOffsetUnits={-1}
           />
         </mesh>
       )}
 
       {/* 4 CỌC GIỜ CHÍNH (12h, 3h, 6h, 9h) HÌNH THOI VÀNG ĐỒNG HỔ PHÁCH */}
-      <group position={[0, 0, 0.09]}>
+      <group position={[0, 0, 0.1]}>
         {[0, Math.PI / 2, Math.PI, (3 * Math.PI) / 2].map((ang, i) => (
           <mesh
             key={`main-mark-${i}`}
