@@ -34,8 +34,42 @@ export const App: React.FC = () => {
       ? Math.max(displayItems.length * 1350, 5400)
       : settings.flashbackDuration * 1000;
 
+  // Phát hiện nếu đang chạy trong trình duyệt nhúng của Messenger/Facebook
+  const isMessenger = useMemo(() => {
+    if (typeof navigator === 'undefined') return false;
+    const ua = navigator.userAgent || navigator.vendor || (window as any).opera || '';
+    return /FBAN|FBAV|FB_IAB|Messenger|FB4A|FBIOS/i.test(ua);
+  }, []);
+
+  const handleOpenChrome = () => {
+    const rawUrl = window.location.href.replace(/^https?:\/\//i, '');
+    if (/Android/i.test(navigator.userAgent)) {
+      window.location.href = `intent://${rawUrl}#Intent;scheme=https;package=com.android.chrome;end`;
+    } else {
+      window.location.href = `googlechromes://${rawUrl}`;
+    }
+  };
+
   return (
     <main className="relative w-screen h-screen overflow-hidden bg-[#050811]">
+      {/* BANNER HƯỚNG DẪN MỞ BẰNG CHROME KHI ĐANG Ở TRONG MESSENGER */}
+      {isMessenger && (
+        <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-r from-amber-600 via-amber-700 to-amber-900 text-white px-4 py-2.5 text-xs sm:text-sm font-medium flex items-center justify-between shadow-2xl border-b border-amber-400/40">
+          <div className="flex items-center gap-2">
+            <span className="text-base animate-bounce">👉</span>
+            <span>
+              Đang mở trong Messenger. Vui lòng bấm <strong className="text-amber-200">⋯</strong> (góc trên bên phải) ➔ chọn <strong>"Mở trong Chrome"</strong> để mượt mà nhất!
+            </span>
+          </div>
+          <button
+            onClick={handleOpenChrome}
+            className="ml-3 shrink-0 px-3.5 py-1 bg-white text-slate-900 font-bold rounded-full shadow hover:bg-amber-100 text-xs transition-colors"
+          >
+            Mở Chrome
+          </button>
+        </div>
+      )}
+
       {/* KHÔNG GIAN 3D WEBGL AAA CHÍNH */}
       <Experience />
 

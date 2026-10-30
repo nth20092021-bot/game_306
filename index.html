@@ -8,6 +8,23 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Lora:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    <!-- Tự động chuyển hướng sang Google Chrome khi mở trong Messenger/Facebook/Instagram -->
+    <script>
+      (function() {
+        try {
+          var ua = navigator.userAgent || navigator.vendor || window.opera || '';
+          var isMessenger = /FBAN|FBAV|FB_IAB|Messenger|FB4A|FBIOS/i.test(ua);
+          if (isMessenger) {
+            var rawUrl = window.location.href.replace(/^https?:\/\//i, '');
+            if (/Android/i.test(ua)) {
+              window.location.href = 'intent://' + rawUrl + '#Intent;scheme=https;package=com.android.chrome;end';
+            } else if (/iPhone|iPad|iPod/i.test(ua)) {
+              window.location.href = 'googlechromes://' + rawUrl;
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
     <style>
       body, html, #root {
         margin: 0;
