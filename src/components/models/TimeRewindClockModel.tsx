@@ -20,7 +20,7 @@ const royalDialVertexShader = `
   }
 `;
 
-// Shader Mặt Nền Trống Đồng Đông Sơn & Hào Quang Thời Gian (Ấm áp, không chói)
+// Shader Mặt Nền Trống Đồng Đông Sơn & Hào Quang Hoàng Gia (Hoàn toàn chống chớp nháy / Anti-Flicker)
 const royalDialFragmentShader = `
   uniform float uTime;
   uniform float uIgnition;
@@ -29,36 +29,40 @@ const royalDialFragmentShader = `
   void main() {
     vec2 centered = vUv - 0.5;
     float r = length(centered) * 2.0;
+    if (r > 1.0) {
+      discard;
+    }
     float angle = atan(centered.y, centered.x);
 
-    // 1. Ngôi sao 14 cánh Trống Đồng Đông Sơn ở trung tâm
-    float starRays = smoothstep(0.08, 0.0, abs(sin(angle * 7.0 + uTime * 0.4)) * r - 0.03) * smoothstep(0.48, 0.1, r);
+    // 1. Ngôi sao 14 cánh Trống Đồng Đông Sơn ở trung tâm (mịn mượt, không răng cưa)
+    float rays14 = cos(angle * 14.0) * 0.5 + 0.5;
+    float starCore = smoothstep(0.42, 0.06, r) * (0.4 + rays14 * 0.6);
 
-    // 2. Các vòng hoa văn kỷ hà đồng tâm xoay ngược chiều nhau
-    float ring1 = smoothstep(0.016, 0.0, abs(r - 0.92));
-    float ring2 = smoothstep(0.012, 0.0, abs(r - 0.78));
-    float ring3 = smoothstep(0.012, 0.0, abs(r - 0.56));
-    float ring4 = smoothstep(0.015, 0.0, abs(r - 0.34));
+    // 2. Các vòng hoa văn chỉ đồng tâm mượt mà (Antialiased concentric gold rings)
+    float ring1 = smoothstep(0.012, 0.002, abs(r - 0.92));
+    float ring2 = smoothstep(0.010, 0.002, abs(r - 0.78));
+    float ring3 = smoothstep(0.010, 0.002, abs(r - 0.56));
+    float ring4 = smoothstep(0.010, 0.002, abs(r - 0.34));
 
-    // Họa tiết kỷ hà cách điệu
-    float patternOuter = step(0.1, sin(angle * 48.0 - uTime * 2.0)) * smoothstep(0.04, 0.0, abs(r - 0.85));
-    float patternMid = step(0.2, cos(angle * 24.0 + uTime * 1.5)) * smoothstep(0.045, 0.0, abs(r - 0.67));
-    float patternInner = step(0.15, sin(angle * 16.0 - uTime * 3.0)) * smoothstep(0.035, 0.0, abs(r - 0.45));
+    // 3. Họa tiết chạm khắc Đông Sơn mượt mà (Dùng hàm cosine liên tục, TUYỆT ĐỐI KHÔNG dùng step thô gây chớp đen)
+    float motifOuter = (cos(angle * 28.0) * 0.5 + 0.5) * smoothstep(0.035, 0.005, abs(r - 0.85));
+    float motifMid   = (sin(angle * 20.0) * 0.5 + 0.5) * smoothstep(0.030, 0.005, abs(r - 0.67));
+    float motifInner = (cos(angle * 14.0) * 0.5 + 0.5) * smoothstep(0.025, 0.005, abs(r - 0.45));
 
-    // 3. Sóng năng lượng lan tỏa từ tâm ra ngoài khi bấm BẮT ĐẦU
-    float surgeWave = sin(r * 12.0 - uTime * 8.0) * 0.5 + 0.5;
-    float ignitionBoost = 1.0 + uIgnition * (2.2 + surgeWave * 1.2);
-    float combined = (ring1 * 1.3 + ring2 + ring3 + ring4 * 1.2 + patternOuter + patternMid * 1.1 + patternInner + starRays * 1.4);
+    // 4. Tổng hợp các tầng hoa văn vàng đồng
+    float combined = (ring1 * 1.2 + ring2 * 0.9 + ring3 * 0.8 + ring4 * 0.9 + motifOuter * 0.65 + motifMid * 0.6 + motifInner * 0.55 + starCore * 1.2);
+
+    // 5. Luồng sáng tâm tỏa nhiệt ấm áp & hiệu ứng bừng sáng khi bấm BẮT ĐẦU (uIgnition)
+    float centerGlow = exp(-r * (3.2 - uIgnition * 1.4)) * (0.35 + uIgnition * 1.6);
+    float pulse = sin(uTime * 1.5) * 0.04; // Dao động thở nhẹ nhàng thanh lịch (không chớp)
 
     vec3 deepGold = vec3(0.85, 0.58, 0.18);
-    vec3 brightImperialGold = vec3(0.96, 0.82, 0.42);
-    vec3 coreFlare = vec3(1.0, 0.92, 0.75);
-    vec3 baseHue = mix(deepGold, brightImperialGold, clamp(combined * 0.6 + uIgnition * 0.4, 0.0, 1.0));
+    vec3 brightImperialGold = vec3(0.98, 0.84, 0.44);
+    vec3 coreFlare = vec3(1.0, 0.95, 0.82);
 
-    // Luồng sáng ấm dịu ở tâm đồng hồ
-    float centerGlow = exp(-r * (3.4 - uIgnition * 1.5)) * (0.32 + uIgnition * 1.25);
-    vec3 finalColor = baseHue * combined * (0.82 * ignitionBoost) + coreFlare * centerGlow;
-    float alpha = clamp((combined * 0.72 + centerGlow) * smoothstep(1.0, 0.94, r), 0.0, 0.92);
+    vec3 baseColor = mix(deepGold, brightImperialGold, clamp(combined * 0.5 + uIgnition * 0.5, 0.0, 1.0));
+    vec3 finalColor = baseColor * (combined * (1.0 + uIgnition * 1.8) + pulse) + coreFlare * centerGlow;
+    float alpha = clamp((combined * 0.75 + centerGlow) * smoothstep(1.0, 0.96, r), 0.0, 0.95);
 
     gl_FragColor = vec4(finalColor, alpha);
   }
@@ -578,11 +582,11 @@ export const TimeRewindClockModel: React.FC<TimeRewindClockProps> = ({
       </group>
 
       {/* TẦNG 3: MẶT NỀN TRỐNG ĐỒNG ĐÔNG SƠN & 5 BÁNH RĂNG LỘ CƠ RỖNG */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -0.1]} material={materials.obsidianDial}>
-        <cylinderGeometry args={[2.55, 2.55, 0.08, 64]} />
+      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -0.16]} material={materials.obsidianDial}>
+        <cylinderGeometry args={[2.55, 2.55, 0.06, 64]} />
       </mesh>
 
-      <mesh position={[0, 0, -0.04]}>
+      <mesh position={[0, 0, -0.06]}>
         <planeGeometry args={[4.95, 4.95]} />
         <shaderMaterial
           vertexShader={royalDialVertexShader}
@@ -679,7 +683,14 @@ export const TimeRewindClockModel: React.FC<TimeRewindClockProps> = ({
       {romanOverlayTexture && (
         <mesh position={[0, 0, 0.082]}>
           <planeGeometry args={[5.25, 5.25]} />
-          <meshBasicMaterial map={romanOverlayTexture} transparent depthWrite={false} />
+          <meshBasicMaterial
+            map={romanOverlayTexture}
+            transparent
+            depthWrite={false}
+            polygonOffset
+            polygonOffsetFactor={-1}
+            polygonOffsetUnits={-1}
+          />
         </mesh>
       )}
 
