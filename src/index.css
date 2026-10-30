@@ -1,0 +1,276 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Lora:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Cinzel:wght@700&display=swap');
+
+:root {
+  --font-vn-serif: 'Lora', 'Be Vietnam Pro', Georgia, serif;
+  --font-vn-sans: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+  --font-roman: 'Cinzel', 'Lora', serif;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html, body {
+    font-family: var(--font-vn-sans) !important;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Tiêu đề chính của Flashback, Tên Học Sinh, Tiêu đề góc trái */
+  .flashback-title,
+  .historical-heading,
+  .student-name-badge,
+  .app-header-title,
+  h1, h2, h3, .font-serif {
+    font-family: var(--font-vn-serif) !important;
+    font-feature-settings: "kern" 1, "liga" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Phụ đề thời kỳ, mô tả lịch sử và nút bấm */
+  .flashback-subtitle,
+  .flashback-era,
+  .flashback-description,
+  .action-btn,
+  button, p {
+    font-family: var(--font-vn-sans) !important;
+    line-height: 1.6;
+  }
+
+  /* Ẩn mọi thẻ icon/emoji trong tiêu đề phụ của Flashback */
+  .flashback-subtitle .icon,
+  .flashback-era .emoji,
+  .flashback-badge svg,
+  .flashback-badge img {
+    display: none !important;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.3);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.6);
+}
+
+/* Glassmorphism helpers */
+.glass-panel {
+  background: rgba(12, 16, 28, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.glass-btn {
+  background: rgba(20, 26, 43, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-btn:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: rgba(255, 223, 128, 0.7);
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 3.6s ease-in-out infinite;
+}
+
+/* =========================================================
+   STUDENT 2D STAGE & LIVE2D-STYLE RIGGING ANIMATIONS
+   ========================================================= */
+.student-2d-stage-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Chùm sáng Spotlight vàng ấm chiếu từ đỉnh sân khấu */
+.student-2d-spotlight {
+  position: absolute;
+  top: -24%;
+  width: 500px;
+  max-width: 95vw;
+  height: 125%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 230, 150, 0.42) 0%,
+    rgba(235, 190, 80, 0.20) 50%,
+    rgba(212, 175, 55, 0.05) 85%,
+    rgba(212, 175, 55, 0.0) 100%
+  );
+  clip-path: polygon(24% 0%, 76% 0%, 100% 100%, 0% 100%);
+  filter: blur(12px);
+  z-index: 1;
+}
+
+/* Hào quang nền ấm áp tôn vinh học sinh */
+.student-2d-aura {
+  position: absolute;
+  top: 15%;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 223, 128, 0.22) 0%,
+    rgba(212, 175, 55, 0.12) 40%,
+    rgba(212, 175, 55, 0) 70%
+  );
+  filter: blur(20px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.student-2d-character-box {
+  position: relative;
+  width: 340px;
+  max-width: 90vw;
+  height: 425px;
+  z-index: 3;
+  filter: drop-shadow(0 16px 28px rgba(0, 0, 0, 0.65));
+}
+
+@media (min-width: 640px) {
+  .student-2d-character-box {
+    width: 380px;
+    height: 475px;
+  }
+}
+
+/* Animation khớp chuyển động (Live2D-Style Rigging) */
+.rig-breathe {
+  transform-origin: 200px 330px;
+  animation: studentBreathe 3.2s ease-in-out infinite;
+}
+
+.rig-head {
+  transform-origin: 200px 215px;
+  animation: studentHeadTilt 4.2s ease-in-out infinite;
+}
+
+.rig-waving-arm {
+  transform-origin: 246px 246px;
+  animation: studentWaveHand 1.25s ease-in-out infinite alternate;
+}
+
+.rig-right-arm {
+  transform-origin: 152px 258px;
+  animation: studentRightArmSway 3.2s ease-in-out infinite;
+}
+
+.rig-hair-back {
+  transform-origin: 200px 145px;
+  animation: hairFlowBack 3.6s ease-in-out infinite alternate;
+}
+
+.rig-hair-lock-left {
+  transform-origin: 132px 160px;
+  animation: hairLockSway 2.9s ease-in-out infinite alternate;
+}
+
+.rig-hair-lock-right {
+  transform-origin: 268px 160px;
+  animation: hairLockSway 3.3s ease-in-out infinite alternate-reverse;
+}
+
+.rig-eye-blink {
+  transform-origin: 200px 168px;
+  animation: studentBlink 4.5s infinite;
+}
+
+/* Bệ đứng vinh danh Hoàng Gia Ánh Vàng (Royal Gold Pedestal) */
+.student-2d-pedestal {
+  position: relative;
+  width: 380px;
+  max-width: 90vw;
+  height: 84px;
+  margin-top: -46px;
+  z-index: 2;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(42, 32, 20, 0.96) 0%,
+    rgba(24, 18, 12, 0.98) 60%,
+    rgba(12, 10, 8, 1) 100%
+  );
+  box-shadow:
+    0 0 0 3px #d4af37,
+    0 0 30px rgba(212, 175, 55, 0.55),
+    inset 0 0 0 8px rgba(255, 223, 128, 0.28),
+    inset 0 0 25px rgba(212, 175, 55, 0.35),
+    0 20px 42px rgba(0, 0, 0, 0.9);
+}
+
+@media (min-width: 640px) {
+  .student-2d-pedestal {
+    width: 420px;
+    height: 92px;
+    margin-top: -50px;
+  }
+}
+
+@keyframes studentBreathe {
+  0%, 100% { transform: translateY(0px) scaleY(1); }
+  50% { transform: translateY(-5px) scaleY(1.012); }
+}
+
+@keyframes studentHeadTilt {
+  0%, 100% { transform: rotate(-1.6deg) translateY(0px); }
+  50% { transform: rotate(2.2deg) translateY(-3px); }
+}
+
+@keyframes studentWaveHand {
+  0% { transform: rotate(-6deg); }
+  100% { transform: rotate(10deg); }
+}
+
+@keyframes studentRightArmSway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(3.5deg); }
+}
+
+@keyframes hairFlowBack {
+  0% { transform: rotate(-1.8deg) scaleX(0.99); }
+  100% { transform: rotate(2.2deg) scaleX(1.015); }
+}
+
+@keyframes hairLockSway {
+  0% { transform: rotate(-2.5deg); }
+  100% { transform: rotate(3.2deg); }
+}
+
+@keyframes studentBlink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.06); }
+}
