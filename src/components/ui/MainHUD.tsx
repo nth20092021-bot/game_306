@@ -24,14 +24,8 @@ export const MainHUD: React.FC = () => {
           isCinematicRunning ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
       >
-        {/* TIÊU ĐỀ TỐI GIẢN (CHỈ ĐỂ CHỮ: ĐỒNG HỒ THỜI GIAN) */}
-        <div>
-          {isIdle && (
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-wider text-slate-100 drop-shadow-md">
-              ĐỒNG HỒ THỜI GIAN
-            </h1>
-          )}
-        </div>
+        {/* GÓC TRÁI TRÊN ĐẦU TRANG (ĐÃ BỎ CHỮ THEO YÊU CẦU ĐỂ TỐI GIẢN TOÀN DIỆN) */}
+        <div />
 
         {/* NÚT TIỆN ÍCH GÓC PHẢI (ÂM THANH & CÀI ĐẶT) */}
         <div className="pointer-events-auto flex items-center gap-3">
