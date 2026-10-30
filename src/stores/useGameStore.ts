@@ -222,7 +222,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     try {
       const customMap: Record<number, string> = {};
       updated.forEach((it) => {
-        if (it.imageUrl && !it.imageUrl.startsWith('/assets/flashback/')) {
+        if (it.imageUrl && !it.imageUrl.includes('assets/flashback/')) {
           customMap[it.id] = it.imageUrl;
         }
       });

@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { FLASHBACK_ITEMS } from '../../data/initialData';
+import { resolveAssetUrl } from '../../data/historicalFlashbacks';
 import { useGameStore } from '../../stores/useGameStore';
 
 // Tạo Canvas Procedural Texture cho thẻ Ký Ức Thời Gian (Fallback khi file ảnh chưa có)
@@ -112,7 +113,7 @@ const Monolith: React.FC<MonolithProps> = ({ item, index, phase }) => {
 
     // Check if custom uploaded photo exists for this file, else load from assets
     const customUrl = customPhotos[item.filename];
-    const imageSrc = customUrl || `/assets/flashback/${item.filename}`;
+    const imageSrc = customUrl || resolveAssetUrl(`assets/flashback/${item.filename}`);
 
     loader.load(
       imageSrc,

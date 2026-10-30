@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import type { HistoricalFlashbackItem } from '../data/historicalFlashbacks';
+import { type HistoricalFlashbackItem, resolveAssetUrl } from '../data/historicalFlashbacks';
 import { soundEngine } from '../utils/soundEngine';
 
 interface FlashbackStageOverlayProps {
@@ -300,7 +300,7 @@ export const FlashbackStageOverlay: React.FC<FlashbackStageOverlayProps> = ({
                 }}
               >
                 <img
-                  src={slide.imageUrl}
+                  src={resolveAssetUrl(slide.imageUrl)}
                   alt={slide.title}
                   loading="eager"
                   className="w-full h-full object-cover object-center transition-transform duration-1000 scale-105"

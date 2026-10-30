@@ -13,6 +13,7 @@ import {
 import { useGameStore } from '../../stores/useGameStore';
 import { Student2DModel } from '../models/Student2DModel';
 import type { HistoricalFlashbackItem } from '../../data/historicalFlashbacks';
+import { resolveAssetUrl } from '../../data/historicalFlashbacks';
 import type { GraphicQuality } from '../../types';
 
 export const SettingsModal: React.FC = () => {
@@ -72,7 +73,7 @@ export const SettingsModal: React.FC = () => {
 
   // Khôi phục ảnh mặc định
   const handleResetPhoto = (item: HistoricalFlashbackItem) => {
-    updateFlashbackItem(item.id, { imageUrl: `/assets/flashback/${item.fileName}` });
+    updateFlashbackItem(item.id, { imageUrl: resolveAssetUrl(`assets/flashback/${item.fileName}`) });
   };
 
   return (
@@ -155,7 +156,7 @@ export const SettingsModal: React.FC = () => {
               {/* GRID 14 ẢNH CÓ THUMBNAIL RÕ RÀNG */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 max-h-[460px] overflow-y-auto pr-1">
                 {flashbackItems.map((item) => {
-                  const isCustom = item.imageUrl && !item.imageUrl.startsWith('/assets/flashback/');
+                  const isCustom = item.imageUrl && !item.imageUrl.includes('assets/flashback/');
                   const isError = imageErrors[item.fileName];
 
                   return (
@@ -167,7 +168,7 @@ export const SettingsModal: React.FC = () => {
                       <div className="relative aspect-video w-full bg-slate-950 overflow-hidden flex items-center justify-center">
                         {!isError ? (
                           <img
-                            src={item.imageUrl}
+                            src={resolveAssetUrl(item.imageUrl)}
                             alt={item.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             onError={() => setImageErrors((prev) => ({ ...prev, [item.fileName]: true }))}
@@ -589,7 +590,7 @@ export const SettingsModal: React.FC = () => {
         >
           <div className="relative max-w-4xl max-h-[85vh] flex flex-col items-center">
             <img
-              src={selectedPreviewImage}
+              src={resolveAssetUrl(selectedPreviewImage)}
               alt="Xem trước ảnh ký ức"
               className="max-w-full max-h-[80vh] object-contain rounded-xl border border-chrono-gold/50 shadow-2xl"
             />
